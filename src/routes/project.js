@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
-router.get("/", (req, res) => {
-  res.json({ Message: "project sent" });
-});
+const { getProject } = require("../controllers/project");
+
+router.get("/:id", getProject);
 
 module.exports = router;

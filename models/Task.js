@@ -2,9 +2,9 @@ const { Sequelize, DataTypes, Model } = require("sequelize");
 const sequelize = require("../database");
 var bcrypt = require("bcryptjs");
 
-class User extends Model {}
+class Task extends Model {}
 
-User.init(
+Task.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -50,19 +50,20 @@ User.init(
   },
   {
     // Other model options go here
-    sequelize, // We need to pass the connection instance
-    modelName: "User", // We need to choose the model name
-    tableName: "users",
+    sequelize,
+    modelName: "Task",
+    tableName: "tasks",
     timestamps: true,
     indexes: [{ unique: true, fields: ["id"] }],
   }
 );
 
-console.log(User === sequelize.models.User); // true
+// the defined model is the class itself
+console.log(Task === sequelize.models.Task); // true
 
 // (async () => {
 //   await sequelize.sync({ alter: true });
 //   // Code here
 // })();
 
-module.exports = User;
+module.exports = Task;
