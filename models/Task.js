@@ -16,15 +16,15 @@ Task.init(
       allowNull: false,
       unique: true,
     },
-    roles: {
-      type: DataTypes.ENUM("member", "admin", "co_admin"),
-      defaultValue: "member",
-    },
-    first_name: {
+    title: {
       type: DataTypes.STRING(100),
     },
-    last_name: {
+    description: {
       type: DataTypes.STRING(100),
+    },
+    status: {
+      type: DataTypes.ENUM("todo", "in_progress", "in_review", "complete"),
+      defaultValue: "todo",
     },
     email: {
       type: DataTypes.STRING(100),
@@ -46,6 +46,14 @@ Task.init(
     account_status: {
       type: DataTypes.ENUM("active", "inactive", "suspended"),
       defaultValue: "active",
+    },
+    payment: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    project_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   },
   {

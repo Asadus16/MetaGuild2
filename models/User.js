@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes, Model } = require("sequelize");
 const sequelize = require("../database");
 var bcrypt = require("bcryptjs");
+const Task = require("./Task");
 
 class User extends Model {}
 
@@ -59,6 +60,18 @@ User.init(
 );
 
 console.log(User === sequelize.models.User); // true
+
+User.hasMany(Task, {
+  foreignKey: "user_id",
+  onUpdate: "CASCADE",
+  onDelete: "SET NULL",
+  as: "tasks",
+});
+Task.belongsTo(User, { foreignKey: "user_id" });
+
+(async () => {
+  await sequelize.sync({ alter: true });
+})();
 
 // (async () => {
 //   await sequelize.sync({ alter: true });

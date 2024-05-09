@@ -1,6 +1,8 @@
 const { Sequelize, DataTypes, Model } = require("sequelize");
 const sequelize = require("../database");
 var bcrypt = require("bcryptjs");
+const Task = require("./Task");
+const User = require("./User");
 
 class Project extends Model {}
 
@@ -20,25 +22,11 @@ Project.init(
       type: DataTypes.ENUM("member", "admin", "co_admin"),
       defaultValue: "member",
     },
-    first_name: {
+    name: {
       type: DataTypes.STRING(100),
     },
-    last_name: {
+    description: {
       type: DataTypes.STRING(100),
-    },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING(128),
-      allowNull: false,
-      set(value) {
-        var salt = bcrypt.genSaltSync(8);
-        var hash = bcrypt.hashSync(value, salt);
-        this.setDataValue("password", hash);
-      },
     },
     picture: {
       type: DataTypes.STRING(100),
@@ -61,9 +49,22 @@ Project.init(
 // the defined model is the class itself
 console.log(Project === sequelize.models.Project); // true
 
+Project.hasMany(Task, {
+  foreignKey: "project_id",
+  onUpdate: "CASCADE",
+  onDelete: "SET NULL",
+  as: "tasks",
+});
+// Project.hasMany(User, {
+//   foreignKey: "project_id",
+//   onUpdate: "CASCADE",
+//   onDelete: "SET NULL",
+//   as: "users",
+// });
+Task.belongsTo(Project, { foreignKey: "project_id" });
+
 (async () => {
   await sequelize.sync({ alter: true });
-  // Code here
 })();
 
 module.exports = Project;
