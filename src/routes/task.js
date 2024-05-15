@@ -2,19 +2,22 @@ const router = require("express").Router();
 
 const {
   getTask,
-  getTasks,
-  createTask,
+  getDaoTasks,
+  // createTask,
   updateTask,
   deleteTask,
+  assignTaskToUser,
 } = require("../controllers/task");
 
 const { verifyToken } = require("../utils/jwt");
 
 router.get("/:id", verifyToken, getTask);
-router.get("/", verifyToken, getTasks);
-router.post("/", createTask);
+router.get("/:daoId", verifyToken, getDaoTasks);
+// router.post("/:daoId/task", createTask);
 router.put("/:id", verifyToken, updateTask);
 router.delete("/:id", verifyToken, deleteTask);
+
+router.put("/:taskId/assign", assignTaskToUser);
 // Create a task within a project (DAO member)
 // Get all tasks for a specific project
 // Get a specific task by ID

@@ -1,5 +1,8 @@
+const Dao = require("../../models/Dao");
 const Task = require("../../models/Task");
+const TaskUser = require("../../models/TaskUser");
 const { Op } = require("sequelize");
+const User = require("../../models/User");
 
 const getTask = async (req, res) => {
   const taskId = req.params.id;
@@ -17,7 +20,7 @@ const getTask = async (req, res) => {
   }
 };
 
-const getTasks = async (req, res) => {
+const getDaoTasks = async (req, res) => {
   let pageNo = 1;
   const { page } = +req.query;
 
@@ -44,25 +47,90 @@ const getTasks = async (req, res) => {
   }
 };
 
-const createTask = async (req, res) => {
-  const taskData = req.body;
+// Endpoint for assigning a user to a task
+const assignTaskToUser = async (req, res) => {
+  const { taskId } = req.params;
+  const { userId } = req.body;
+  const currentUser = req.user; // Assuming user data is available in the request
 
   try {
-    const { first_name, last_name, email, password } = taskData;
+    // Check if user is admin for the DAO associated with the task
+    const task = await getTaskWithDaoId(taskId); // Implement logic to fetch task and associated DAO
 
-    const newTask = Task.build({ first_name, last_name, email, password });
+    if (task.daoId && !currentUser.isAdminForDao(task.daoId)) {
+      // Replace with your logic
+      return res.status(403).json({ error: "Unauthorized to assign users" });
+    }
 
-    await newTask.save({
-      fields: ["first_name", "last_name", "email", "password"],
+    // Check if user is a member of the DAO
+    const isMember = await UserDao.findOne({
+      where: {
+        userId,
+        daoId: task.daoId,
+      },
     });
 
-    // await newTask.destroy()
+    if (!isMember) {
+      return res.status(400).json({ error: "User is not a member of the DAO" });
+    }
 
-    return res.status(201).json(newTask);
+    // Assign user to task (implement your logic)
+    await assignUserToTask(taskId, userId);
+
+    res.status(200).json({ message: "User assigned to task successfully" });
   } catch (error) {
-    return res.status(500).json(error);
+    console.error(error);
+    res.status(500).json({ error: "Failed to assign user to task" });
   }
 };
+
+// async function isUserAdminOfDao(user, daoId) {
+//   // Implement logic to check user role in the DAO
+//   // (e.g., check if user.role === 'admin' in UserDao join table for this daoId)
+//   const dao = await Dao.findByPk(daoId, {
+//     include: [
+//       {
+//         model: User,
+//         as: "members", // Assuming 'members' is the alias for users in the UserDao association
+//         where: { id: user.id, role: "admin" }, // Check for user ID and admin role
+//       },
+//     ],
+//   });
+
+//   return !!dao; // Return true if DAO is found with the user as an admin member
+// }
+
+// const createTask = async (req, res) => {
+//   const { daoId } = req.params;
+//   const { name, description } = req.body;
+//   const currentUser = req.user; // Assuming user data is available in the request
+
+//   try {
+//     // Validate task data (optional, can be done before this block)
+//     const validationErrors = validateTask(req.body);
+//     if (validationErrors) {
+//       return res.status(400).json({ errors: validationErrors });
+//     }
+
+//     // Check if user is admin of the DAO
+//     const isAdmin = await isUserAdminOfDao(currentUser, daoId);
+//     if (!isAdmin) {
+//       return res.status(403).json({ error: "Unauthorized to create tasks" });
+//     }
+
+//     // Create the task with the DAO ID as foreign key
+//     const task = await Task.create({
+//       name,
+//       description,
+//       daoId, // Set the foreign key
+//     });
+
+//     res.status(201).json(task);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Failed to create task" });
+//   }
+// };
 
 const updateTask = async (req, res) => {
   const taskId = req.params.id;
@@ -129,8 +197,9 @@ const deleteTask = async (req, res) => {
 
 module.exports = {
   getTask,
-  getTasks,
-  createTask,
+  getDaoTasks,
+  // createTask,
+  assignTaskToUser,
   updateTask,
   deleteTask,
 };

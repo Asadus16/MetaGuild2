@@ -11,9 +11,8 @@ const {
 
 const { verifyToken } = require("../utils/jwt");
 
-router.get("/:id", getUser);
 router.get("/me", verifyToken, getMe);
-router.get("/:id", verifyToken, getUser);
+router.get("/:userId", verifyToken, getUser);
 router.get("/", verifyToken, getUsers);
 router.post("/", createUser);
 router.put("/:id", verifyToken, updateUser);

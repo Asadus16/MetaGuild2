@@ -1,6 +1,7 @@
 const { Sequelize, DataTypes, Model } = require("sequelize");
 const sequelize = require("../database");
 var bcrypt = require("bcryptjs");
+const Dao = require("./Dao");
 
 class Task extends Model {}
 
@@ -10,11 +11,6 @@ Task.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
-    },
-    smartContract: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: true,
     },
     title: {
       type: DataTypes.STRING(100),
@@ -26,32 +22,17 @@ Task.init(
       type: DataTypes.ENUM("todo", "in_progress", "in_review", "complete"),
       defaultValue: "todo",
     },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING(128),
-      allowNull: false,
-      set(value) {
-        var salt = bcrypt.genSaltSync(8);
-        var hash = bcrypt.hashSync(value, salt);
-        this.setDataValue("password", hash);
-      },
+    tags: {
+      type: DataTypes.STRING(),
     },
     picture: {
       type: DataTypes.STRING(100),
-    },
-    account_status: {
-      type: DataTypes.ENUM("active", "inactive", "suspended"),
-      defaultValue: "active",
     },
     payment: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    project_id: {
+    dao_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
@@ -67,11 +48,15 @@ Task.init(
 );
 
 // the defined model is the class itself
-console.log(Task === sequelize.models.Task); // true
+console.log(Task === sequelize.models.Task, "Task REAL"); // true
+
+Dao.hasMany(Task, {
+  foreignKey: "dao_id",
+  as: "tasks",
+});
 
 // (async () => {
-//   await sequelize.sync({ alter: true });
-//   // Code here
+//   await sequelize.sync({ force: true });
 // })();
 
 module.exports = Task;

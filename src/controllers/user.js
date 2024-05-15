@@ -1,8 +1,9 @@
 const User = require("../../models/User");
+const UserDao = require("../../models/UserDao");
 const { Op } = require("sequelize");
 
 const getUser = async (req, res) => {
-  const userId = req.params.id;
+  const userId = req.params.userId;
 
   try {
     const user = await User.findByPk(+userId);
@@ -23,14 +24,7 @@ const getMe = async (req, res) => {
   try {
     const user = await User.findByPk(+userId, {
       attributes: {
-        exclude: [
-          "account_status",
-          "email_verification_status",
-          "createdAt",
-          "last_login",
-          "password",
-          "updatedAt",
-        ],
+        exclude: ["createdAt", "updatedAt"],
       },
     });
 
@@ -75,18 +69,19 @@ const createUser = async (req, res) => {
   const userData = req.body;
 
   try {
-    const { first_name, last_name, email, password } = userData;
+    const { name, contract_address } = userData;
 
-    const newUser = User.build({ first_name, last_name, email, password });
+    const newUser = User.build({ name, contract_address });
 
     await newUser.save({
-      fields: ["first_name", "last_name", "email", "password"],
+      fields: ["name", "contract_address"],
     });
 
     // await newUser.destroy()
 
     return res.status(201).json(newUser);
   } catch (error) {
+    // console.log(error);
     return res.status(500).json(error);
   }
 };
@@ -108,23 +103,10 @@ const updateUser = async (req, res) => {
       },
       {
         where: {
-          email: userData.email,
+          contract_address: userData.contract_address,
           // id: { [Op.eq]: +userId },
         },
-        fields: [
-          "phone",
-          "address",
-          "postal_code",
-          "city",
-          "state",
-          "country",
-          "gender",
-          "facebook",
-          "instagram",
-          "linkedin",
-          "twitter",
-          "whatsapp",
-        ],
+        fields: ["name", "ens_address"],
       }
     );
 

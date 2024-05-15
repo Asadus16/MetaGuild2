@@ -1,7 +1,8 @@
 const { Sequelize, DataTypes, Model } = require("sequelize");
 const sequelize = require("../database");
 var bcrypt = require("bcryptjs");
-const Task = require("./Task");
+const Dao = require("./Dao");
+// const UserDao = require("./UserDao");
 
 class User extends Model {}
 
@@ -12,35 +13,34 @@ User.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    smartContract: {
+    contract_address: {
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
     },
-    roles: {
+    ens_address: {
+      type: DataTypes.STRING(100),
+      unique: true,
+    },
+    role: {
       type: DataTypes.ENUM("member", "admin", "co_admin"),
       defaultValue: "member",
     },
-    first_name: {
+    name: {
       type: DataTypes.STRING(100),
     },
-    last_name: {
-      type: DataTypes.STRING(100),
-    },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING(128),
-      allowNull: false,
-      set(value) {
-        var salt = bcrypt.genSaltSync(8);
-        var hash = bcrypt.hashSync(value, salt);
-        this.setDataValue("password", hash);
-      },
-    },
+    // email: {
+    //   type: DataTypes.STRING(100),
+    //   unique: true,
+    // },
+    // password: {
+    //   type: DataTypes.STRING(128),
+    //   set(value) {
+    //     var salt = bcrypt.genSaltSync(8);
+    //     var hash = bcrypt.hashSync(value, salt);
+    //     this.setDataValue("password", hash);
+    //   },
+    // },
     picture: {
       type: DataTypes.STRING(100),
     },
@@ -59,23 +59,19 @@ User.init(
   }
 );
 
-console.log(User === sequelize.models.User); // true
+console.log(User === sequelize.models.User, "USER REAL"); // true
 
-User.hasMany(Task, {
-  foreignKey: "user_id",
-  onUpdate: "CASCADE",
-  onDelete: "SET NULL",
-  as: "tasks",
-});
-Task.belongsTo(User, { foreignKey: "user_id" });
-
-(async () => {
-  await sequelize.sync({ alter: true });
-})();
+// User.belongsToMany(Dao, { through: UserDao, foreignKey: "user_id" });
+// User.hasMany(Task, {
+//   foreignKey: "user_id",
+//   onUpdate: "CASCADE",
+//   onDelete: "SET NULL",
+//   as: "tasks",
+// });
+// Task.belongsTo(User, { foreignKey: "user_id" });
 
 // (async () => {
 //   await sequelize.sync({ alter: true });
-//   // Code here
 // })();
 
 module.exports = User;
