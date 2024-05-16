@@ -14,6 +14,7 @@ Task.init(
     },
     title: {
       type: DataTypes.STRING(100),
+      allowNull: false,
     },
     description: {
       type: DataTypes.STRING(100),
@@ -56,7 +57,7 @@ Dao.hasMany(Task, {
 });
 
 // (async () => {
-//   await sequelize.sync({ force: true });
+//   await sequelize.sync({ alter: true });
 // })();
 
 module.exports = Task;

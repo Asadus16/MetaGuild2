@@ -11,8 +11,6 @@ const verifyToken = (req, res, next) => {
 
     if (decoded.userId) {
       req.userId = decoded.userId;
-    } else {
-      req.agentId = decoded.agentId;
     }
     next();
   } catch (error) {

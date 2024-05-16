@@ -37,8 +37,10 @@ console.log(UserDao === sequelize.models.UserDao, "USERDAO REAL");
 Dao.belongsToMany(User, { through: UserDao, foreignKey: "dao_id" });
 User.belongsToMany(Dao, { through: UserDao, foreignKey: "user_id" });
 
+UserDao.belongsTo(User, { foreignKey: "user_id" });
+
 // (async () => {
-//   await sequelize.sync({ force: true });
+//   await sequelize.sync({ alter: true });
 // })();
 
 module.exports = UserDao;

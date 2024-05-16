@@ -1,6 +1,9 @@
 const Dao = require("../../models/Dao");
 const { Op } = require("sequelize");
 const Task = require("../../models/Task");
+const UserDao = require("../../models/UserDao");
+const User = require("../../models/User");
+const TaskUser = require("../../models/TaskUser");
 
 const getDao = async (req, res) => {
   const daoId = req.params.id;
@@ -20,21 +23,21 @@ const getDao = async (req, res) => {
 
 const getDaoMembers = async (req, res) => {
   try {
-    // Extract daoId from request parameters
     const { daoId } = req.params;
 
-    // Find the DAO with the given daoId
-    const dao = await Dao.findByPk(+daoId);
+    const daoMembers = await UserDao.findAll({
+      where: { dao_id: daoId },
+      include: {
+        model: User,
+        attributes: ["id", "contract_address", "picture"],
+      },
+    });
 
-    if (!dao) {
+    if (!daoMembers) {
       return res.status(404).json({ error: "DAO not found" });
     }
 
-    // Fetch all users associated with the DAO
-    const members = await dao.getUsers();
-
-    // Send the list of members as the response
-    res.json({ members });
+    res.json(daoMembers);
   } catch (error) {
     console.error("Error fetching members:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -74,14 +77,20 @@ const createDao = async (req, res) => {
   try {
     const { name, description } = daoData;
 
-    const newDao = Dao.build({
+    const newDao = await Dao.create({
       name,
       description,
     });
 
-    await newDao.save({
-      fields: ["name", "description"],
+    await UserDao.create({
+      user_id: req.userId,
+      dao_id: newDao.id,
+      role: "admin", // Set user role as admin in the join table
     });
+
+    // await newDao.save({
+    //   fields: ,
+    // });
 
     // await newDao.destroy()
 
@@ -138,18 +147,65 @@ const deleteDao = async (req, res) => {
   }
 };
 
+const joinDao = async (req, res) => {
+  const { daoId } = req.params;
+
+  try {
+    // Check if user is already a member of the DAO
+    const existingMembership = await UserDao.findOne({
+      where: { user_id: req.userId, dao_id: daoId },
+    });
+
+    if (existingMembership) {
+      return res
+        .status(400)
+        .json({ error: "User already a member of this DAO" });
+    }
+
+    // Create an association between the user and the DAO
+    await UserDao.create({
+      user_id: req.userId,
+      dao_id: daoId,
+      role: "member", // Set user role as member (can be adjusted based on your requirements)
+    });
+
+    res.status(201).json({ message: "Successfully joined the DAO" });
+  } catch (error) {
+    console.error("Error joining DAO:", error);
+    res.status(500).json({ error: "Failed to join DAO" });
+  }
+};
+
+const getDaoTasks = async (req, res) => {
+  try {
+    const { daoId } = req.params;
+
+    const daoTasks = await Task.findAll({
+      where: { dao_id: daoId },
+    });
+
+    if (!daoTasks) {
+      return res.status(404).json({ error: "No task found" });
+    }
+
+    res.json(daoTasks);
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    throw error; // Re-throw the error for handling at the API endpoint level
+  }
+};
+
 // Endpoint for creating a task
 const createDaoTask = async (req, res) => {
   const { daoId } = req.params;
-  const { name, description } = req.body;
-  const currentUser = req.user; // Assuming user data is available in the request
+  const { title, description, payment } = req.body;
 
   try {
     // Check if user is admin for the DAO
     const isAdmin = await UserDao.findOne({
       where: {
-        userId: currentUser.id,
-        daoId,
+        user_id: req.userId,
+        dao_id: daoId,
         role: "admin",
       },
     });
@@ -158,19 +214,23 @@ const createDaoTask = async (req, res) => {
       return res.status(403).json({ error: "Unauthorized to create tasks" });
     }
 
-    // Create the task (implement your logic)
-    // const task = await createTask(daoId, name, description);
-
     // Create the task with the DAO ID as foreign key
     const task = await Task.create({
-      name,
+      title,
       description,
-      daoId, // Set the foreign key
+      payment,
+      dao_id: daoId, // Set the foreign key
+    });
+
+    await TaskUser.create({
+      task_id: task.id,
+      user_id: req.userId,
+      role: "admin", // Set role as admin
     });
 
     res.status(201).json(task);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     res.status(500).json({ error: "Failed to create task" });
   }
 };
@@ -182,5 +242,7 @@ module.exports = {
   createDao,
   updateDao,
   deleteDao,
+  joinDao,
+  getDaoTasks,
   createDaoTask,
 };
