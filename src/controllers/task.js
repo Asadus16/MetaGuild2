@@ -3,6 +3,7 @@ const Task = require("../../models/Task");
 const TaskUser = require("../../models/TaskUser");
 const { Op } = require("sequelize");
 const User = require("../../models/User");
+const UserDao = require("../../models/UserDao");
 
 const getTask = async (req, res) => {
   const taskId = req.params.id;
@@ -55,7 +56,7 @@ const assignTaskToUser = async (req, res) => {
 
   try {
     // Check if user is admin for the DAO associated with the task
-    const task = await getTaskWithDaoId(taskId); // Implement logic to fetch task and associated DAO
+    const task = await Task.findByPk(taskId); // Implement logic to fetch task and associated DAO
 
     if (task.daoId && !currentUser.isAdminForDao(task.daoId)) {
       // Replace with your logic
@@ -65,8 +66,8 @@ const assignTaskToUser = async (req, res) => {
     // Check if user is a member of the DAO
     const isMember = await UserDao.findOne({
       where: {
-        userId,
-        daoId: task.daoId,
+        user_id: userId,
+        dao_id: task.dao_id,
       },
     });
 
@@ -75,12 +76,15 @@ const assignTaskToUser = async (req, res) => {
     }
 
     // Assign user to task (implement your logic)
-    await assignUserToTask(taskId, userId);
+    await TaskUser.create({
+      user_id: userId,
+      task_id: taskId,
+      role: "contributor", // Set user role as member (can be adjusted based on your requirements)
+    });
 
     res.status(200).json({ message: "User assigned to task successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to assign user to task" });
+    res.status(500).json(error);
   }
 };
 

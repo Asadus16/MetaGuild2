@@ -107,6 +107,7 @@ const updateDao = async (req, res) => {
   try {
     const updated = await Dao.update(
       {
+        name: daoData.name,
         description: daoData.description,
         image: daoData.image,
         linkedin: daoData.linkedin,
@@ -117,7 +118,7 @@ const updateDao = async (req, res) => {
           // email: daoData.email,
           id: { [Op.eq]: +daoId },
         },
-        fields: ["description", "image", "linkedin", "website"],
+        fields: ["name", "description", "image", "linkedin", "website"],
       }
     );
 
@@ -127,6 +128,7 @@ const updateDao = async (req, res) => {
 
     return res.status(404).json("No dao record found.");
   } catch (err) {
+    console.log(err);
     return res.status(500).json(err);
   }
 };

@@ -29,6 +29,9 @@ User.init(
     name: {
       type: DataTypes.STRING(100),
     },
+    discord: {
+      type: DataTypes.STRING(100),
+    },
     // email: {
     //   type: DataTypes.STRING(100),
     //   unique: true,
@@ -60,15 +63,6 @@ User.init(
 );
 
 console.log(User === sequelize.models.User, "USER REAL"); // true
-
-// User.belongsToMany(Dao, { through: UserDao, foreignKey: "user_id" });
-// User.hasMany(Task, {
-//   foreignKey: "user_id",
-//   onUpdate: "CASCADE",
-//   onDelete: "SET NULL",
-//   as: "tasks",
-// });
-// Task.belongsTo(User, { foreignKey: "user_id" });
 
 // (async () => {
 //   await sequelize.sync({ alter: true });

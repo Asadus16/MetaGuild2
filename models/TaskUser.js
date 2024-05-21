@@ -39,7 +39,7 @@ User.belongsToMany(Task, { through: TaskUser, foreignKey: "user_id" });
 Task.belongsToMany(User, { through: TaskUser, foreignKey: "task_id" });
 
 // (async () => {
-//   await sequelize.sync({ force: true });
+//   await sequelize.sync({ alter: true });
 // })();
 
 module.exports = TaskUser;

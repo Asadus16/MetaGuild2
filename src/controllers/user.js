@@ -87,15 +87,14 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const userId = req.params.id;
   const userData = req.body;
 
   try {
     const updated = await User.update(
       {
-        phone: userData.phone,
-        address: userData.address,
-        gender: userData.gender,
+        name: userData.name,
+        contract_address: userData.contract_address,
+        picture: userData.picture,
         facebook: userData.facebook,
         instagram: userData.instagram,
         linkedin: userData.linkedin,
@@ -106,7 +105,7 @@ const updateUser = async (req, res) => {
           contract_address: userData.contract_address,
           // id: { [Op.eq]: +userId },
         },
-        fields: ["name", "ens_address"],
+        // fields: ["name", "ens_address"],
       }
     );
 
@@ -116,6 +115,7 @@ const updateUser = async (req, res) => {
 
     return res.status(404).json("No user record found.");
   } catch (err) {
+    console.log(err);
     return res.status(500).json(err);
   }
 };
