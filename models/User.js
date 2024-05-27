@@ -51,6 +51,12 @@ User.init(
       type: DataTypes.ENUM("active", "inactive", "suspended"),
       defaultValue: "active",
     },
+    linkedin: {
+      type: DataTypes.STRING(100),
+    },
+    website: {
+      type: DataTypes.STRING(100),
+    },
   },
   {
     // Other model options go here

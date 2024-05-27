@@ -94,11 +94,9 @@ const updateUser = async (req, res) => {
       {
         name: userData.name,
         contract_address: userData.contract_address,
+        ens_address: userData.ens_address,
         picture: userData.picture,
-        facebook: userData.facebook,
-        instagram: userData.instagram,
         linkedin: userData.linkedin,
-        twitter: userData.twitter,
       },
       {
         where: {
