@@ -31,7 +31,10 @@ Task.init(
     },
     payment: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      // allowNull: false,
+    },
+    deadline: {
+      type: DataTypes.DATEONLY,
     },
     dao_id: {
       type: DataTypes.INTEGER,
@@ -49,7 +52,7 @@ Task.init(
 );
 
 // the defined model is the class itself
-console.log(Task === sequelize.models.Task, "Task REAL"); // true
+console.log(Task === sequelize.models.Task, "Task REAL");
 
 Dao.hasMany(Task, {
   foreignKey: "dao_id",
