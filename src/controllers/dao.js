@@ -259,7 +259,6 @@ const createDaoTask = async (req, res) => {
 const updateDaoTask = async (req, res) => {
   const { daoId, taskId } = req.params;
   const { title, description, payment, deadline } = req.body;
-  console.log(deadline);
 
   try {
     // Check if user is admin for the DAO
