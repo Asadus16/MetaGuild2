@@ -130,7 +130,7 @@ const updateDao = async (req, res) => {
         description: daoData.description,
         image: daoData.image,
         linkedin: daoData.linkedin,
-        website: daoData.twitter,
+        website: daoData.website,
       },
       {
         where: {
@@ -145,7 +145,7 @@ const updateDao = async (req, res) => {
       return res.status(200).json({ updated: updated });
     }
 
-    return res.status(404).json("No dao record found.");
+    return res.status(404).json("No DAO found.");
   } catch (err) {
     console.log(err);
     return res.status(500).json(err);
@@ -156,15 +156,28 @@ const deleteDao = async (req, res) => {
   const daoId = req.params.id;
 
   try {
+    const isAdmin = await UserDao.findOne({
+      where: {
+        user_id: req.userId,
+        dao_id: daoId,
+        role: "admin",
+      },
+    });
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: "Unauthorized to delete DAO" });
+    }
+
+    // await newDao.destroy()
     const deleted = await Dao.destroy({
       where: {
         id: { [Op.eq]: +daoId },
       },
     });
 
-    res.status(200).json({ deleted: deleted });
-  } catch (err) {
-    res.status(500).json(err);
+    return res.status(200).json({ deleted: deleted });
+  } catch (error) {
+    return res.status(500).json(error);
   }
 };
 
@@ -317,6 +330,44 @@ const updateDaoTask = async (req, res) => {
   }
 };
 
+const deleteDaoTask = async (req, res) => {
+  const { daoId, taskId } = req.params;
+
+  try {
+    const isAdmin = await UserDao.findOne({
+      where: {
+        user_id: req.userId,
+        dao_id: daoId,
+        role: "admin",
+      },
+    });
+
+    if (!isAdmin) {
+      return res.status(403).json({ error: "Unauthorized to create tasks" });
+    }
+
+    // Create the task with the DAO ID as foreign key
+    const existingTask = await Task.findOne({
+      where: {
+        id: taskId,
+        dao_id: daoId,
+      },
+    });
+
+    if (!existingTask) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    if (existingTask) {
+      await existingTask.destroy(); // Delete the task
+      return res.status(200).json({ deleted: true });
+    }
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Failed to delete task" });
+  }
+};
+
 module.exports = {
   getDao,
   getDaoMembers,
@@ -329,4 +380,5 @@ module.exports = {
   createDaoTask,
   updateDaoTask,
   isDaoAdmin,
+  deleteDaoTask,
 };
