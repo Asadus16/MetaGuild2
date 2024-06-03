@@ -271,7 +271,7 @@ const createDaoTask = async (req, res) => {
 
 const updateDaoTask = async (req, res) => {
   const { daoId, taskId } = req.params;
-  const { title, description, payment, deadline } = req.body;
+  const { title, description, payment, deadline, status } = req.body;
 
   try {
     // Check if user is admin for the DAO
@@ -311,7 +311,7 @@ const updateDaoTask = async (req, res) => {
       existingTask.description = description;
       existingTask.payment = payment;
       existingTask.deadline = deadline;
-      // existingTask.deadline = new Date(deadline);
+      existingTask.status = status;
 
       await existingTask.save(); // Save the updated task
       return res.status(200).json(existingTask); // Send updated task data
