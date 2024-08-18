@@ -11,8 +11,10 @@ const {
   createDaoTask,
   joinDao,
   updateDaoTask,
-  isDaoAdmin,
+  updateDaoUserRole,
   deleteDaoTask,
+  getDaoAdmin,
+  isDaoMember,
 } = require("../controllers/dao");
 
 const { verifyToken } = require("../utils/jwt");
@@ -23,12 +25,14 @@ router.post("/", verifyToken, createDao);
 router.put("/:id", verifyToken, updateDao);
 router.delete("/:id", verifyToken, deleteDao);
 
-router.get("/:daoId/isadmin", verifyToken, isDaoAdmin);
+router.get("/:daoId/ismember", verifyToken, isDaoMember);
 router.get("/:daoId/members", getDaoMembers);
+router.get("/:daoId/admin", getDaoAdmin);
 router.get("/:daoId/join", verifyToken, joinDao);
 router.get("/:daoId/tasks", getDaoTasks);
 router.post("/:daoId/task", verifyToken, createDaoTask);
 router.put("/:daoId/task/:taskId", verifyToken, updateDaoTask);
+router.put("/:daoId/user/:userId", verifyToken, updateDaoUserRole);
 router.delete("/:daoId/task/:taskId", verifyToken, deleteDaoTask);
 
 module.exports = router;

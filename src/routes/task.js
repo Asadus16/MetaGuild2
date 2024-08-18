@@ -7,17 +7,19 @@ const {
   updateTask,
   deleteTask,
   assignTaskToUser,
+  getUserTasks,
 } = require("../controllers/task");
 
 const { verifyToken } = require("../utils/jwt");
 
+router.get("/user", verifyToken, getUserTasks);
 router.get("/:id", verifyToken, getTask);
 router.get("/:daoId", verifyToken, getDaoTasks);
 // router.post("/:daoId/task", createTask);
 router.put("/:id", verifyToken, updateTask);
 router.delete("/:id", verifyToken, deleteTask);
 
-router.put("/:taskId/assign", assignTaskToUser);
+router.put("/:taskId/assign", verifyToken, assignTaskToUser);
 // Create a task within a project (DAO member)
 // Get all tasks for a specific project
 // Get a specific task by ID

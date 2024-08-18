@@ -52,16 +52,20 @@ const getDaoTasks = async (req, res) => {
 const assignTaskToUser = async (req, res) => {
   const { taskId } = req.params;
   const { userId } = req.body;
-  const currentUser = req.user; // Assuming user data is available in the request
+  const adminUserId = req.userId; // Assuming user data is available in the request
+
+  // if (userId === adminUserId) {
+  //   return res.status(403).json({ message: "Dao cannot assign a task to itself" });
+  // }
 
   try {
     // Check if user is admin for the DAO associated with the task
     const task = await Task.findByPk(taskId); // Implement logic to fetch task and associated DAO
 
-    if (task.daoId && !currentUser.isAdminForDao(task.daoId)) {
-      // Replace with your logic
-      return res.status(403).json({ error: "Unauthorized to assign users" });
-    }
+    // if (task.daoId && !currentUser.isAdminForDao(task.daoId)) {
+    //   // Replace with your logic
+    //   return res.status(403).json({ error: "Unauthorized to assign users" });
+    // }
 
     // Check if user is a member of the DAO
     const isMember = await UserDao.findOne({
@@ -84,7 +88,36 @@ const assignTaskToUser = async (req, res) => {
 
     res.status(200).json({ message: "User assigned to task successfully" });
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ error: "User already assigned" });
+  }
+};
+
+const getUserTasks = async (req, res) => {
+  const userId = req.userId; // Assuming user data is available in the request
+
+  // if (userId === adminUserId) {
+  //   return res.status(403).json({ message: "Dao cannot assign a task to itself" });
+  // }
+
+  try {
+    // Check if user is admin for the DAO associated with the task
+    const tasks = await TaskUser.findAll({
+      where: {
+        user_id: userId,
+        role: "contributor",
+      },
+    }); // Implement logic to fetch task and associated DAO
+
+    if (!tasks) {
+      return res.status(404).json({ error: "No tasks found for the user" });
+    }
+
+    // Assign user to task (implement your logic)
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "User already assigned" });
   }
 };
 
@@ -203,6 +236,7 @@ module.exports = {
   getTask,
   getDaoTasks,
   // createTask,
+  getUserTasks,
   assignTaskToUser,
   updateTask,
   deleteTask,

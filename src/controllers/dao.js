@@ -21,19 +21,22 @@ const getDao = async (req, res) => {
   }
 };
 
-const isDaoAdmin = async (req, res) => {
+const isDaoMember = async (req, res) => {
   const { daoId } = req.params;
 
   try {
-    const daoAdmin = await UserDao.findOne({
+    const daoMember = await UserDao.findOne({
       where: { dao_id: daoId, user_id: req.userId },
+      include: {
+        model: User,
+      },
     });
 
-    if (!daoAdmin) {
+    if (!daoMember) {
       return res.status(404).json({ error: "No such user in DAO" });
     }
 
-    res.json(daoAdmin);
+    res.json(daoMember);
   } catch (error) {
     console.error("Error fetching members:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -48,7 +51,13 @@ const getDaoMembers = async (req, res) => {
       where: { dao_id: daoId },
       include: {
         model: User,
-        attributes: ["id", "contract_address", "picture", "name"],
+        attributes: [
+          "id",
+          "contract_address",
+          "picture",
+          "name",
+          "email_address",
+        ],
       },
     });
 
@@ -59,6 +68,29 @@ const getDaoMembers = async (req, res) => {
     res.json(daoMembers);
   } catch (error) {
     console.error("Error fetching members:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getDaoAdmin = async (req, res) => {
+  try {
+    const { daoId } = req.params;
+
+    const daoAdmin = await UserDao.findOne({
+      where: { dao_id: daoId, role: "admin" },
+      include: {
+        model: User,
+        // attributes: ["id", "contract_address", "picture", "name"],
+      },
+    });
+
+    if (!daoAdmin) {
+      return res.status(404).json({ error: "DAO not found" });
+    }
+
+    res.json(daoAdmin);
+  } catch (error) {
+    console.error("Error fetching Admin:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -330,6 +362,51 @@ const updateDaoTask = async (req, res) => {
   }
 };
 
+const updateDaoUserRole = async (req, res) => {
+  const { daoId, userId } = req.params;
+  const { role } = req.body;
+
+  try {
+    const user = await UserDao.findOne({
+      where: {
+        user_id: userId,
+        dao_id: daoId,
+      },
+    });
+
+    if (!user) {
+      return res.status(403).json({ error: "Unauthorized to update user" });
+    }
+
+    user.role = role;
+    await user.save();
+
+    return res.status(200).json(user);
+
+    // if (existingTask) {
+    //   existingTask.title = title;
+    //   existingTask.description = description;
+    //   existingTask.payment = payment;
+    //   existingTask.deadline = deadline;
+    //   existingTask.status = status;
+
+    //   await existingTask.save(); // Save the updated task
+    //   return res.status(200).json(existingTask); // Send updated task data
+    // }
+
+    // await TaskUser.create({
+    //   task_id: task.id,
+    //   user_id: req.userId,
+    //   role: "admin", // Set role as admin
+    // });
+
+    // res.status(200).json(existingTask);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Failed to update dao user" });
+  }
+};
+
 const deleteDaoTask = async (req, res) => {
   const { daoId, taskId } = req.params;
 
@@ -371,6 +448,7 @@ const deleteDaoTask = async (req, res) => {
 module.exports = {
   getDao,
   getDaoMembers,
+  getDaoAdmin,
   getDaos,
   createDao,
   updateDao,
@@ -379,6 +457,7 @@ module.exports = {
   getDaoTasks,
   createDaoTask,
   updateDaoTask,
-  isDaoAdmin,
+  updateDaoUserRole,
+  isDaoMember,
   deleteDaoTask,
 };

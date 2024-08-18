@@ -22,6 +22,10 @@ User.init(
       type: DataTypes.STRING(100),
       unique: true,
     },
+    email_address: {
+      type: DataTypes.STRING(100),
+      unique: true,
+    },
     role: {
       type: DataTypes.ENUM("member", "admin", "co_admin"),
       defaultValue: "member",

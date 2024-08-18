@@ -95,6 +95,7 @@ const updateUser = async (req, res) => {
         name: userData.name,
         contract_address: userData.contract_address,
         ens_address: userData.ens_address,
+        email_address: userData.email_address,
         picture: userData.picture,
         linkedin: userData.linkedin,
       },
